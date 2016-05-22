@@ -3,20 +3,21 @@ def prompt(message)
 end
 
 def valid_number?(num)
-	/^\d+\.?\d+$/.match(num)
+	/^\d+\.?\d*$/.match(num)
 end
 
 def operation_to_message(op)
-	case op
-	when '1'
-		'Adding'
-	when '2'
-		'Subtracting'
-	when '3'
-		'Multiplying'
-	when '4'
-		'Dividing'
-	end
+	choice = case op
+						 when '1'
+					     'Adding'
+						 when '2'
+							 'Subtracting'
+						 when '3'
+							 'Multiplying'
+						 when '4'
+							 'Dividing'
+						 end
+	choice
 end
 
 prompt("Welcome to Calculator! Enter your name: ")
