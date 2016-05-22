@@ -1,3 +1,6 @@
+require 'yaml'
+MESSAGES = YAML.load_file('calculator_messages.yml')
+
 def prompt(message)
 	Kernel.puts("=> #{message}")
 end
@@ -20,58 +23,51 @@ def operation_to_message(op)
 	choice
 end
 
-prompt("Welcome to Calculator! Enter your name: ")
+prompt(MESSAGES['welcome'])
 
 name = ''
 loop do
 	name = Kernel.gets().chomp()
 
 	if name.empty?()
-		prompt("Make sure to use a valid name.")
+		prompt(MESSAGES['valid_name'])
 	else
 		break
 	end
 end
 
-prompt("Hi #{name}!")
+prompt(eval(%Q["#{MESSAGES['greet']}"]))
 
 loop do
 	number1 = ''
 	loop do
-	  prompt("What's the first number?")
+	  prompt(MESSAGES['first_number'])
 	  number1 = Kernel.gets().chomp()
 
 	  break if valid_number?(number1)
-	  prompt("Hmm... that doesn't look like a valid number.")
+	  prompt(MESSAGES['valid_number'])
 	end
 
 	number2 = ''
 	loop do
-	  prompt("What's the second number?")
+	  prompt(MESSAGES['second_number'])
 	  number2 = Kernel.gets().chomp()
 
 	  break if valid_number?(number2)
-	  prompt("Hmm... that doesn't look like a valid number.")
+	  prompt(MESSAGES['valid_number'])
 	end
   
-  operator_prompt = <<-MSG
-    What operation would you like to perform?
-    1) add
-    2) subtract
-    3) multiply
-    4) divide
-  MSG
-	prompt(operator_prompt)
+	prompt(MESSAGES['operator'])
 	
 	operator = ''
 	loop do
 	  operator = Kernel.gets().chomp()
 
 	  break if %w(1 2 3 4).include?(operator)
-	  prompt("Must choose 1, 2, 3, or 4")
+	  prompt(MESSAGES['valid_operator'])
 	end
 
-	prompt("#{operation_to_message(operator)} the two numbers...")
+	prompt(eval(%Q["#{MESSAGES['confirmation']}"]))
 
 	result = case operator
 					 when '1'
@@ -84,11 +80,11 @@ loop do
 					 	 number1.to_f() / number2.to_f()
 	end
 
-	prompt("The result is #{result}")
+	prompt(eval(%Q["#{MESSAGES['result1']}"]))
 
-	prompt("Do you want to perform another calculation? (Y to calculate again)")
+	prompt(MESSAGES['again'])
 	answer = Kernel.gets().chomp()
 	break unless answer.downcase().start_with?('y')
 end
 
-prompt("Thank you for using the calculator. Good bye!")
+prompt(MESSAGES['bye'])
