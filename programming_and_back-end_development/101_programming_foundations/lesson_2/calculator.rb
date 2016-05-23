@@ -1,8 +1,15 @@
 require 'yaml'
 MESSAGES = YAML.load_file('calculator_messages.yml')
 
-def prompt(message)
-	Kernel.puts("=> #{message}")
+LANGUAGE = 'de'
+
+def messages(message, lang='en')
+  MESSAGES[lang][message]
+end
+
+def prompt(key, msg = '')
+  message = messages(key, LANGUAGE)   
+  Kernel.puts("=> #{message}" + msg)
 end
 
 def valid_number?(num)
@@ -23,51 +30,51 @@ def operation_to_message(op)
 	choice
 end
 
-prompt(MESSAGES['welcome'])
+prompt('welcome')
 
 name = ''
 loop do
 	name = Kernel.gets().chomp()
 
 	if name.empty?()
-		prompt(MESSAGES['valid_name'])
+		prompt('valid_name')
 	else
 		break
 	end
 end
 
-prompt(eval(%Q["#{MESSAGES['greet']}"]))
+prompt('greet', "#{name}")
 
 loop do
 	number1 = ''
 	loop do
-	  prompt(MESSAGES['first_number'])
+	  prompt('first_number')
 	  number1 = Kernel.gets().chomp()
 
 	  break if valid_number?(number1)
-	  prompt(MESSAGES['valid_number'])
+	  prompt('valid_number')
 	end
 
 	number2 = ''
 	loop do
-	  prompt(MESSAGES['second_number'])
+	  prompt('second_number')
 	  number2 = Kernel.gets().chomp()
 
 	  break if valid_number?(number2)
-	  prompt(MESSAGES['valid_number'])
+	  prompt('valid_number')
 	end
   
-	prompt(MESSAGES['operator'])
+	prompt('operator')
 	
 	operator = ''
 	loop do
 	  operator = Kernel.gets().chomp()
 
 	  break if %w(1 2 3 4).include?(operator)
-	  prompt(MESSAGES['valid_operator'])
+	  prompt('valid_operator')
 	end
 
-	prompt(eval(%Q["#{MESSAGES['confirmation']}"]))
+	puts "=> #{operation_to_message(operator)}"
 
 	result = case operator
 					 when '1'
@@ -80,11 +87,11 @@ loop do
 					 	 number1.to_f() / number2.to_f()
 	end
 
-	prompt(eval(%Q["#{MESSAGES['result1']}"]))
+	prompt('result1', "#{result}")
 
-	prompt(MESSAGES['again'])
+	prompt('again')
 	answer = Kernel.gets().chomp()
 	break unless answer.downcase().start_with?('y')
 end
 
-prompt(MESSAGES['bye'])
+prompt('bye')
