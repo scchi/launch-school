@@ -1,4 +1,4 @@
-### Exercises: Easy 1 ###
+### Exercises: Easy 2 ###
 
 ##### Question 1
 
