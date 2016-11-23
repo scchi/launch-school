@@ -1,13 +1,62 @@
 # ROCK, PAPER, SCISSORS, LIZARD SPOCK
-#    - each game is a race to 10 points
-#    - Computer player is one of R2D2, Hal, Sonny, Number 5, and Chappie. 
-#      Each computer has its own playing style as follows:
-#         R2D2 chooses moves at random
-#         Hal prefers rock
-#         Chappie adjusts every move depending on 1.) the human player's previous move and 2.) if human player won or lost
-#           (based on study published in Scientific Reports -> https://goo.gl/c1rr9Z)    
-#         Sonny likes scissors and spock
-#         Number 5 chooses the move that can beat the most frequent move used by the human player
+# - each game is a race to 10 points
+# - Computer player is one of R2D2, Hal, Sonny, Number 5, and Chappie.
+#   Each computer has its own playing style as follows:
+#    * R2D2 chooses moves at random
+#    * Hal prefers rock
+#    * Chappie adjusts every move depending on 1.) the human player's
+#      previous move and 2.) if human player won or lost
+#    * Sonny likes scissors and spock
+#    * Number 5 chooses the move that can beat the most
+#      frequent move used by human player
+module Display
+  def display_welcome_message
+    puts "Welcome to Rock, Paper, Scissors, Lizard, Spock!"
+  end
+
+  def display_goodbye_message
+    puts "Thanks for playing Rock, Paper, Scissors, Lizard, Spock. Good bye!"
+  end
+
+  def display_moves
+    puts "#{human.name} chose #{human.move}."
+    puts "#{computer.name} chose #{computer.move}."
+    puts
+  end
+
+  def display_winner
+    if determine_winner == human
+      puts "#{human.name} won!"
+    elsif determine_winner == computer
+      puts "#{computer.name} won!"
+    else
+      puts "It's a tie!"
+    end
+    puts
+  end
+
+  def display_score
+    puts "#{human.name}: #{human.score}"
+    puts "#{computer.name}: #{computer.score}"
+    puts
+  end
+
+  def display_game_winner
+    if human.score == 10
+      puts "#{human.name} won!"
+    else
+      puts "#{computer.name} won!"
+    end
+  end
+
+  def clear_screen
+    system 'clear'
+  end
+
+  def display_commentary(first, action, second)
+    puts "#{first} #{action} #{second}!"
+  end
+end
 
 class Move
   attr_reader :value
@@ -42,19 +91,21 @@ class Move
   end
 
   def >(other_move)
-    (rock? && (other_move.scissors? || other_move.lizard?)) ||
-      (paper? && (other_move.rock? || other_move.spock?)) ||
-      (scissors? && (other_move.paper? || other_move.lizard?)) ||
-      (spock? && (other_move.rock? || other_move.scissors?)) ||
-      (lizard? && (other_move.spock? || other_move.paper?))
+    comparison_hash = { 'rock' => ['scissors', 'lizard'],
+                        'paper' => ['rock', 'spock'],
+                        'scissors' => ['paper', 'lizard'],
+                        'spock' => ['rock', 'scissors'],
+                        'lizard' => ['spock', 'paper'] }
+    comparison_hash[value].include?(other_move.value)
   end
 
   def <(other_move)
-    (rock? && (other_move.spock? || other_move.paper?)) ||
-      (paper? && (other_move.lizard? || other_move.scissors?)) ||
-      (scissors? && (other_move.spock? || other_move.rock?)) ||
-      (spock? && (other_move.paper? || other_move.lizard?)) ||
-      (lizard? && (other_move.rock? || other_move.scissors?))
+    comparison_hash = { 'rock' => ['spock', 'paper'],
+                        'paper' => ['lizard', 'scissors'],
+                        'scissors' => ['spock', 'rock'],
+                        'spock' => ['paper', 'lizard'],
+                        'lizard' => ['rock', 'scissors'] }
+    comparison_hash[value].include?(other_move.value)
   end
 
   def to_s
@@ -74,16 +125,16 @@ end
 
 class Human < Player
   def set_name
-    n = ""
+    name = ""
 
     loop do
       puts "What's your name?"
-      n = gets.chomp
-      break unless n.empty?
+      name = gets.chomp
+      break unless name.empty? || !(name =~ /[^\s]/)
       puts "Sorry, must enter a value."
     end
 
-    self.name = n
+    self.name = name
   end
 
   def choose
@@ -91,11 +142,9 @@ class Human < Player
     loop do
       puts "Please choose rock, paper, scissors, lizard, spock:"
       puts "'r' rock, 'p' paper, 's' scissors, 'l' lizard, 'sp' spock"
-      choice = gets.chomp
+      choice = gets.chomp.downcase
       break if (Move::VALUES + ['r', 'p', 's', 'l', 'sp']).include? choice
       puts "Sorry, invalid choice."
-      sleep(0.5)
-      system "clear"
     end
 
     choice = choice_to_move(choice) if choice.size <= 2
@@ -149,7 +198,9 @@ class Computer < Player
   def number_5_adjust(history)
     move_frequency = Hash.new
     Move::VALUES.each { |move| move_frequency[move] = history.count(move) }
-    frequent_move = Move.new(move_frequency.sort_by { |_move, count| count }.flatten[-2])
+    sorted_moves = move_frequency.sort_by { |_move, count| count }
+    frequent_move = Move.new(sorted_moves.flatten[-2])
+
     next_move = ''
     Move::VALUES.each do |move|
       if frequent_move < Move.new(move)
@@ -211,6 +262,7 @@ class Gameplay
 end
 
 class RPSGame
+  include Display
   attr_accessor :human, :computer
 
   def initialize
@@ -218,23 +270,9 @@ class RPSGame
     @computer = Computer.new
   end
 
-  def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors, Lizard, Spock!"
-  end
-
-  def display_goodbye_message
-    puts "Thanks for playing Rock, Paper, Scissors, Lizard, Spock. Good bye!"
-  end
-
   def update_history
     human.history << human.move.value
     computer.history << computer.move.value
-  end
-
-  def display_moves
-    puts "#{human.name} chose #{human.move}."
-    puts "#{computer.name} chose #{computer.move}."
-    puts
   end
 
   def determine_winner
@@ -247,28 +285,34 @@ class RPSGame
     end
   end
 
-  def display_winner
+  def commentary
+    action = determine_action
+
     if determine_winner == human
-      puts "#{human.name} won!"
-    elsif determine_winner == computer
-      puts "#{computer.name} won!"
+      first = human.move.to_s
+      second = computer.move.to_s
     else
-      puts "It's a tie!"
+      first = computer.move.to_s
+      second = human.move.to_s
     end
-    puts
+
+    display_commentary(first, action, second)
   end
 
-  def commentary
-    moves_to_action = { ['paper', 'scissors'] => 'CUTS',    ['paper', 'rock'] => 'COVERS',
-                        ['lizard', 'rock'] => 'CRUSHES',    ['lizard', 'spock'] => 'POISONS',
-                        ['scissors', 'spock'] => 'SMASHES', ['lizard', 'scissors'] => 'DECAPITATES',
-                        ['lizard', 'paper'] => 'EATS',      ['paper', 'spock'] => 'DISPROVES',
-                        ['rock', 'spock'] => 'VAPORIZERS',  ['rock', 'scissors'] => 'CRUSHES' }
-    move_array = [human.move.value, computer.move.value].sort
-    action = moves_to_action[move_array]
+  def determine_action
+    moves_to_action = { ['paper', 'scissors'] => 'CUTS',
+                        ['paper', 'rock'] => 'COVERS',
+                        ['lizard', 'rock'] => 'CRUSHES',
+                        ['lizard', 'spock'] => 'POISONS',
+                        ['scissors', 'spock'] => 'SMASHES',
+                        ['lizard', 'scissors'] => 'DECAPITATES',
+                        ['lizard', 'paper'] => 'EATS',
+                        ['paper', 'spock'] => 'DISPROVES',
+                        ['rock', 'spock'] => 'VAPORIZERS',
+                        ['rock', 'scissors'] => 'CRUSHES' }
 
-    first, second = human.move > computer.move ? [human.move, computer.move] : [computer.move, human.move]
-    puts "#{first} #{action} #{second}!" unless human.move == computer.move
+    players_move = [human.move.value, computer.move.value].sort
+    moves_to_action[players_move]
   end
 
   def update_score
@@ -277,12 +321,6 @@ class RPSGame
     elsif human.move < computer.move
       computer.score += 1
     end
-  end
-
-  def display_score
-    puts "#{human.name}: #{human.score}"
-    puts "#{computer.name}: #{computer.score}"
-    puts
   end
 
   def someone_won?
@@ -294,57 +332,53 @@ class RPSGame
     computer.score = 0
   end
 
-  def display_game_winner
-    if human.score == 10
-      puts "#{human.name} won!"
-    else
-      puts "#{computer.name} won!"
-    end
-  end
-
   def play_again?
-    answer = nil
-
     loop do
       puts "Would you like to play again? (y/n)"
       answer = gets.chomp
-      break if ['y', 'n'].include? answer.downcase
+      return false if answer.casecmp('n') == 0
+      return true if answer.casecmp('y') == 0
       puts "Sorry, must be y or n."
     end
+  end
 
-    return false if answer.downcase == 'n'
-    return true if answer.downcase == 'y'
+  def computer_adjust
+    if computer.name == 'Chappie' || computer.name == 'Number 5'
+      computer.adjust_gameplay(determine_winner, human.move, human.history)
+    end
+  end
+
+  def display_result
+    display_moves
+    commentary unless human.move == computer.move
+    display_winner
+    display_score
+  end
+
+  def match
+    loop do
+      human.choose
+      computer.choose
+      update_history
+      clear_screen
+      update_score
+      display_result
+      computer_adjust
+      break if someone_won?
+    end
   end
 
   def play
     display_welcome_message
-
     loop do
-      loop do
-        human.choose
-        computer.choose
-        update_history
-        system "clear"
-        display_moves
-        commentary
-        display_winner
-        update_score
-        display_score
-
-        if computer.name == 'Chappie' || computer.name == 'Number 5'
-          computer.adjust_gameplay(determine_winner, human.move, human.history)
-        end
-
-        break if someone_won?
-      end
-      sleep(0.5)
-      system "clear"
+      match
+      clear_screen
       display_score
       display_game_winner
       reset_score
       break unless play_again?
     end
-
+    clear_screen
     display_goodbye_message
   end
 end
