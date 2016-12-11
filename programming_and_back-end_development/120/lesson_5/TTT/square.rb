@@ -7,15 +7,11 @@ class Square
     @marker = marker
   end
 
-  def marked?
-    marker != INITIAL_MARKER
-  end
+
 
   def to_s
     @marker
   end
 
-  def unmarked?
-    marker == INITIAL_MARKER
-  end
+
 end

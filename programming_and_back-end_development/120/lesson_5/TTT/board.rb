@@ -1,4 +1,6 @@
+require 'pry'
 class Board
+  attr_reader :squares
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                   [[1, 5, 9], [3, 5, 7]]
@@ -23,12 +25,11 @@ class Board
   end
 
   def []=(num, marker)
-    @squares[num].marker = marker
+    @squares[num] = marker
   end
 
   def unmarked_keys
-    @squares.keys.select { |key| @squares[key].unmarked? }
-    # @squares.select { |_, sq| sq.unmarked?}.keys
+    @squares.keys.select { |key| unmarked?(key) }
   end
 
   def full?
@@ -39,8 +40,16 @@ class Board
     !!winning_marker
   end
 
+  def marked?
+    marker != INITIAL_MARKER
+  end
+
+  def unmarked?(key)
+    @squares[key] == " "
+  end
+
   def three_identical_markers?(squares)
-    markers = squares.select(&:marked?).collect(&:marker)
+    markers = squares.select { |sq| sq != " " }
     return false if markers.size != 3
     markers.min == markers.max
   end
@@ -49,13 +58,14 @@ class Board
     WINNING_LINES.each do |line|
       squares = @squares.values_at(*line)
       if three_identical_markers?(squares)
-        return squares.first.marker
+
+        return squares.first
       end
     end
     nil
   end
 
   def reset
-    (1..9).each { |key| @squares[key] = Square.new }
+    (1..9).each { |key| @squares[key] = " " }
   end
 end
