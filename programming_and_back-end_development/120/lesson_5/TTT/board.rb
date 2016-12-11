@@ -1,25 +1,31 @@
+require 'pry'
 class Board
-  attr_reader :squares
+  INITIAL_BOARD_STATE = { 1 => " ", 2 => " ", 3 => " ",
+                          4 => " ", 5 => " ", 6 => " ",
+                          7 => " ", 8 => " ", 9 => " " }.freeze
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                   [[1, 5, 9], [3, 5, 7]]
 
-  def initialize
-    @squares = {}
-    reset
+  attr_reader :squares
+
+  def initialize(state = INITIAL_BOARD_STATE.dup)
+    @squares = state
   end
 
   def draw
     puts "     |     |"
     puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
-    puts "     |     |"
-    puts "-----+-----+-----"
-    puts "     |     |"
+    draw_border
     puts "  #{@squares[4]}  |  #{@squares[5]}  |  #{@squares[6]}"
+    draw_border
+    puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
+    puts "     |     |"
+  end
+
+  def draw_border
     puts "     |     |"
     puts "-----+-----+-----"
-    puts "     |     |"
-    puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
     puts "     |     |"
   end
 
