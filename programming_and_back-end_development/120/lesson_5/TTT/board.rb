@@ -1,4 +1,3 @@
-require 'pry'
 class Board
   attr_reader :squares
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
