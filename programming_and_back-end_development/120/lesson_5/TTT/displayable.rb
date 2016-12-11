@@ -1,4 +1,13 @@
 module Displayable
+  def clear
+    system('clear') || system('cls')
+  end
+
+  def clear_screen_and_display_board
+    clear
+    display_board
+  end
+
   def display_welcome_message
     puts "Welcome to Tic Tac Toe!"
     puts ""

@@ -55,8 +55,7 @@ class Board
 
   def three_identical_markers?(squares)
     markers = squares.select { |sq| sq != " " }
-    return false if markers.size != 3
-    markers.min == markers.max
+    markers.size == 3 && markers.min == markers.max
   end
 
   def winning_marker
