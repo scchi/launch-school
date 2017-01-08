@@ -1,3 +1,84 @@
+module Displayable
+  def welcome_message
+    puts "Welcome to Twenty-One!"
+    puts ""
+  end
+
+  def show_stats_after_move
+    show_game_points
+    show_initial_cards
+  end
+
+  def show_cards
+    puts "You had:"
+    human.show_hand
+    puts ""
+    puts "Dealer had:"
+    dealer.show_hand
+    puts ""
+  end
+
+  def show_initial_cards
+    puts "You have:"
+    human.show_hand
+    puts ""
+    dealer.show_initial_hand
+    puts ""
+  end
+
+  def show_result
+    winner = determine_winner
+    puts ""
+
+    case winner
+    when :tie then puts "It's a tie"
+    else puts "#{winner.to_s.capitalize} won!"
+    end
+    puts ""
+
+    show_cards
+    show_score
+    puts "-" * 20
+  end
+
+  def show_score
+    puts "Card Points:"
+    puts "You: #{human.card_points}, Dealer: #{dealer.card_points}"
+    puts ""
+    show_game_points
+  end
+
+  def show_game_points
+    puts "Game Points:"
+    puts "You: #{human_score}, Dealer: #{dealer_score}"
+    puts ""
+  end
+
+  def show_game_result
+    human_score == 3 ? (puts "You won!") : (puts "Dealer won!")
+  end
+
+  def clear_screen
+    system 'clear'
+    system 'cls'
+  end
+
+  def goodbye
+    puts "Thank you for playing Twenty One!"
+  end
+
+  def play_again?
+    answer = nil
+    loop do
+      puts "Do you want to play again? (y/n)"
+      answer = gets.chomp.downcase
+      break if ['y', 'n'].include?(answer)
+    end
+
+    answer == 'y'
+  end
+end
+
 class Card
   attr_reader :rank, :suit
 
@@ -59,13 +140,14 @@ class Deck
   end
 end
 
-module Hand
+class Hand
   include Enumerable
 
-  attr_accessor :total_value
+  attr_accessor :total_value, :cards
 
-  def each
-    cards.each { |card| yield card }
+  def initialize
+    @cards = []
+    @total_value = 0
   end
 
   def <<(card)
@@ -84,7 +166,6 @@ module Hand
   end
 
   def show_hand
-    puts "You have:"
     cards.each { |card| puts card }
   end
 
@@ -98,24 +179,44 @@ module Hand
 end
 
 class Player
-  include Hand
-
+  attr_reader :hand
   attr_accessor :cards
 
   def initialize
-    @cards = []
-    @total_value = 0
+    @hand = Hand.new
+  end
+
+  def <<(card)
+    hand << card
+  end
+
+  def clear_hand
+    hand.clear_hand
+  end
+
+  def clear_score
+    hand.clear_score
+  end
+
+  def show_hand
+    hand.show_hand
+  end
+
+  def card_points
+    hand.card_points
   end
 end
 
 class Dealer < Player
-  def show_hand
+  def show_initial_hand
     puts "Dealer has:"
-    puts "#{cards.first} and an unkown card."
+    puts "#{hand.cards.first} and an unkown card."
   end
 end
 
 class Game
+  include Displayable
+
   ROUNDS_TO_WIN = 3
   BUSTED_VALUE = 21
 
@@ -130,11 +231,6 @@ class Game
     @dealer_score = 0
   end
 
-  def welcome_message
-    puts "Welcome to Twenty-One!"
-    puts ""
-  end
-
   def deal_cards
     2.times do
       human << deck.deal
@@ -142,30 +238,23 @@ class Game
     end
   end
 
-  def show_cards
-    human.show_hand
-    puts ""
-    dealer.show_hand
-    puts ""
-  end
-
   def human_turn
     loop do
       answer = nil
 
       loop do
-        puts "Would you like to hit or stay? ('h' for hit, 's' for stay)"
+        puts "Would you like to 'h'it, 's'tay, or 'q'uit?"
         answer = gets.chomp.downcase
-        break if ["h", "s"].include?(answer)
+        break if ["h", "s", "q"].include?(answer)
         puts "Sorry, invalid choice."
       end
 
-      system 'clear'
+      clear_screen
       break if answer == 's'
+      throw :quit if answer == 'q'
       hit(human)
       break if busted?(human)
-      show_game_points
-      show_cards
+      show_stats_after_move
     end
   end
 
@@ -181,63 +270,22 @@ class Game
     hit(dealer) until dealer.card_points >= 17
   end
 
-  def show_result
-    winner = determine_winner
-    puts ""
-
-    case winner
-    when :Tie then puts "It's a tie"
-    else puts "#{winner} won!"
-    end
-    puts ""
-
-    show_score
-  end
-
-  def show_score
-    puts "Card Points:"
-    puts "You: #{human.card_points}, Dealer: #{dealer.card_points}"
-    puts ""
-    show_game_points
-  end
-
-  def show_game_points
-    puts "Game Points:"
-    puts "You: #{human_score}, Dealer: #{dealer_score}"
-    puts ""
-  end
-
-  def show_game_result
-    human_score == 3 ? (puts "You won!") : (puts "Dealer won!")
-  end
-
   def determine_winner
-    if human.card_points > dealer.card_points then :You
-    elsif human.card_points < dealer.card_points then :Dealer
-    else :Tie
+    if human.card_points > dealer.card_points then :you
+    elsif human.card_points < dealer.card_points then :dealer
+    else :tie
     end
   end
 
   def update_score
     case determine_winner
-    when :You then self.human_score += 1
-    when :Dealer then self.dealer_score += 1
+    when :you then self.human_score += 1
+    when :dealer then self.dealer_score += 1
     end
   end
 
   def someone_won?
     [human_score, dealer_score].include?(ROUNDS_TO_WIN)
-  end
-
-  def play_again?
-    answer = nil
-    loop do
-      puts "Do you want to play again? (y/n)"
-      answer = gets.chomp.downcase
-      break if ['y', 'n'].include?(answer)
-    end
-
-    answer == 'y'
   end
 
   def clear_round_stats
@@ -266,24 +314,24 @@ class Game
     clear_screen
     puts "You busted. Dealer won!"
     self.dealer_score += 1
+    show_cards
     show_score
+    puts "-" * 20
   end
 
   def dealer_busted
     clear_screen
     puts "Dealer busted. You won!"
     self.human_score += 1
+    show_cards
     show_score
-  end
-
-  def clear_screen
-    system 'clear'
+    puts "-" * 20
   end
 
   def round_prep
     clear_round_stats
     deal_cards
-    show_cards
+    show_initial_cards
   end
 
   def play_round
@@ -304,14 +352,16 @@ class Game
   def start
     clear_screen
     welcome_message
-    loop do
-      game_prep
-      play_round
-      show_game_result
-      break unless play_again?
+    catch :quit do
+      loop do
+        game_prep
+        play_round
+        show_game_result
+        break unless play_again?
+      end
     end
     clear_screen
-    puts "Thank you for playing Twenty One!"
+    goodbye
   end
 end
 
