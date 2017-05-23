@@ -1,0 +1,145 @@
+@import url("whitespace-reset.css");
+
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+body {
+  margin: 8px;
+  box-sizing: border-box;
+}
+
+article {
+  width: 680px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  padding: 15px;
+  font: 28px normal Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 56px;
+  font-weight: bold;
+}
+
+h2, dl {
+  font-weight: bold;
+  padding: 8px 0 5px 0;
+}
+
+dd {
+  font-weight: normal;
+}
+
+p + h2 {
+  border-top: 30px solid black;
+  border-bottom: 1px solid black;
+}
+
+p {
+  padding-bottom: 3px;
+}
+
+dd, dt, dl {
+  display: inline-block;
+}
+
+header dl {
+  box-sizing: border-box;
+  width: 49%;
+}
+
+dl + dl {
+  text-align: right;
+}
+
+table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+
+table:first-of-type {
+  border-top: 15px solid black;
+
+}
+
+table:last-of-type {
+  font-size: 20px;
+}
+
+tbody + tbody {
+  border-top: 15px solid black;
+  margin-bottom: 20px;
+}
+
+tr {
+  border-top: 1px solid black;
+}
+
+table:last-of-type tr:first-of-type {
+  border-top: none;
+}
+
+
+td {
+  text-align: left;
+}
+
+tbody td, tbody th {
+  padding: 3px 0;
+}
+
+td:empty {
+  width: 20px;
+  border-top: 1px solid transparent;
+}
+
+td:last-child {
+  text-align: right;
+}
+
+th {
+  text-align: left;
+}
+
+table:first-of-type tbody:first-of-type td:last-of-type {
+  font-weight: bold;
+}
+
+table:first-of-type thead th {
+  text-align: right;
+}
+
+tfoot td:last-of-type {
+  padding-top: 20px;
+  padding-left: 10px;
+  font-size: 25px;
+  text-align: left;
+  text-indent: -0.9rem;
+}
+
+table:last-of-type {
+  width: 100%;
+  font-size: 22px;
+  margin-top: 20px;
+  line-height: 22px;
+}
+
+table:last-of-type td {
+  border: 1px solid transparent;
+  text-align: left
+}
+
+table:last-of-type th {
+  font-weight: normal;
+  border-bottom: 1px solid black;
+}
+
+table:last-of-type th:nth-of-type(3) {
+  width: 20%;
+}
+
